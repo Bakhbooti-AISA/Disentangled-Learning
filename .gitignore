@@ -1,0 +1,6 @@
+checkpoints/*
+data/*
+raw/*
+**/__pycache__/
+make_structure.sh
+Li2022DTS.pdf

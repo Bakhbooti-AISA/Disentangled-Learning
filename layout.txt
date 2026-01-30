@@ -1,0 +1,33 @@
+LWM/
+├── src/
+│   ├── backbones/
+│   │   ├── __init__.py
+│   │   ├── tcn.py              # TCNEncoder/TCNDecoder (generic)
+│   │   ├── lstm.py             # LSTMEncoder/LSTMDecoder (generic)
+│   │   └── utils.py            # small blocks (conv blocks, residual, etc.)
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── vae_base.py         # BaseTimeSeriesVAE: encode/sample/decode/get_latent
+│   │   ├── dts_vae.py          # DTSVAE: wires loss terms + optional classifier head
+│   │   ├── heads.py            # classifier heads, optional GRL/segment split
+│   │   └── outputs.py          # dataclasses/TypedDict for model outputs
+│   │
+│   ├── losses/
+│   │   ├── __init__.py
+│   │   ├── gaussian.py         # reparam + log_normal_diag
+│   │   ├── tc_estimator.py     # log q(z), log prod q(z), TC, DWKL, KL(qz||pz)
+│   │   └── dts_eq7.py          # implements DTS Eq(7) objective (returns loss + stats)
+│   │
+│   ├── data/
+│   │   ├── __init__.py
+│   │   ├── dataset_base.py     # generic window dataset + split helpers
+│   │   ├── windowing.py        # sliding windows, label aggregation
+│   │   └── wisdm.py            # WISDM loader + preprocess -> (X, y, subject_ids)
+│   │
+│   ├── train.py                # simple training loop (no framework)
+│   └── extract_latents.py      # loads model, saves mu/z for a dataset split
+│
+└── data/
+    ├── raw/                    # drop raw WISDM here
+    └── processed/              # cached windows (.npz or .pt)
