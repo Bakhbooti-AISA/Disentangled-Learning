@@ -6,7 +6,8 @@ from typing import Optional, Sequence, Tuple
 
 import numpy as np
 import torch
-from torch.utils.data import Dataset
+import os
+from torch.utils.data import Dataset, dataloader
 
 
 class WindowDataset(Dataset):
@@ -110,3 +111,54 @@ def subset_arrays(
     mask: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     return X[mask], y[mask], subjects[mask]
+
+
+def save_splits_npz(path, *,
+                    X_tr, y_tr, s_tr,
+                    X_va, y_va, s_va,
+                    X_te, y_te, s_te,
+                    mean, std,
+                    meta: dict | None = None):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    # meta goes in as a numpy object array; allow_pickle=True will be needed when loading
+    if meta is None:
+        meta = {}
+
+    np.savez_compressed(
+        path,
+        X_tr=X_tr, y_tr=y_tr, s_tr=s_tr,
+        X_va=X_va, y_va=y_va, s_va=s_va,
+        X_te=X_te, y_te=y_te, s_te=s_te,
+        mean=np.asarray(mean),
+        std=np.asarray(std),
+        meta=np.array(meta, dtype=object),
+    )
+    print(f"Saved splits to: {path}")
+
+
+def load_splits_npz(path):
+    d = np.load(path, allow_pickle=True)
+    meta = d["meta"].item() if "meta" in d else {}
+
+    out = {
+        "X_tr": d["X_tr"], "y_tr": d["y_tr"], "s_tr": d["s_tr"],
+        "X_va": d["X_va"], "y_va": d["y_va"], "s_va": d["s_va"],
+        "X_te": d["X_te"], "y_te": d["y_te"], "s_te": d["s_te"],
+        "mean": d["mean"], "std": d["std"],
+        "meta": meta,
+    }
+    return out
+
+def make_loaders_from_splits(splits, *, batch_size=256, num_workers=2, pin_memory=True):
+    mean, std = splits["mean"], splits["std"]
+
+    ds_train = WindowDataset(splits["X_tr"], splits["y_tr"], splits["s_tr"],standardize=True, mean=mean, std=std)
+    ds_val   = WindowDataset(splits["X_va"], splits["y_va"], splits["s_va"],standardize=True, mean=mean, std=std)
+    ds_test  = WindowDataset(splits["X_te"], splits["y_te"], splits["s_te"],standardize=True, mean=mean, std=std)
+
+    dl_train = DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+    dl_val   = DataLoader(ds_val, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
+    dl_test  = DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
+
+    return dl_train, dl_val, dl_test, (ds_train, ds_val, ds_test)
