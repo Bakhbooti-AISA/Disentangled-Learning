@@ -1,6 +1,9 @@
 checkpoints/*
+!checkpoints/.gitkeep
 data/*
+!data/.gitkeep
 raw/*
+!raw/.gitkeep
 **/__pycache__/
 make_structure.sh
 Li2022DTS.pdf
