@@ -7,7 +7,7 @@ from typing import Optional, Sequence, Tuple
 import numpy as np
 import torch
 import os
-from torch.utils.data import Dataset, dataloader
+from torch.utils.data import Dataset, DataLoader
 
 
 class WindowDataset(Dataset):
@@ -157,7 +157,7 @@ def make_loaders_from_splits(splits, *, batch_size=256, num_workers=2, pin_memor
     ds_val   = WindowDataset(splits["X_va"], splits["y_va"], splits["s_va"],standardize=True, mean=mean, std=std)
     ds_test  = WindowDataset(splits["X_te"], splits["y_te"], splits["s_te"],standardize=True, mean=mean, std=std)
 
-    dl_train = DataLoader(ds_train, batch_size=batch_size, shuffle=True, num_workers=num_workers, pin_memory=pin_memory)
+    dl_train = DataLoader(ds_train, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     dl_val   = DataLoader(ds_val, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
     dl_test  = DataLoader(ds_test, batch_size=batch_size, shuffle=False, num_workers=num_workers, pin_memory=pin_memory)
 
